@@ -1,22 +1,24 @@
 #ifndef MYSLAM_BACKEND_PROBLEM_H
 #define MYSLAM_BACKEND_PROBLEM_H
 
-#include <unordered_map>
 #include <map>
 #include <memory>
+#include <unordered_map>
 
-#include "backend/eigen_types.h"
 #include "backend/edge.h"
+#include "backend/eigen_types.h"
 #include "backend/vertex.h"
 
 typedef unsigned long ulong;
 
-namespace myslam {
-namespace backend {
+namespace myslam
+{
+namespace backend
+{
 
-class Problem {
+class Problem
+{
 public:
-
     /**
      * 问题的类型
      * SLAM问题还是通用的问题
@@ -25,12 +27,9 @@ public:
      * SLAM问题只接受一些特定的Vertex和Edge
      * 如果是通用问题那么hessian是稠密的，除非用户设定某些vertex为marginalized
      */
-    enum class ProblemType {
-        SLAM_PROBLEM,
-        GENERIC_PROBLEM
-    };
+    enum class ProblemType { SLAM_PROBLEM, GENERIC_PROBLEM };
     typedef unsigned long ulong;
-//    typedef std::unordered_map<unsigned long, std::shared_ptr<Vertex>> HashVertex;
+    // typedef std::unordered_map<unsigned long, std::shared_ptr<Vertex>> HashVertex;
     typedef std::map<unsigned long, std::shared_ptr<Vertex>> HashVertex;
     typedef std::unordered_map<unsigned long, std::shared_ptr<Edge>> HashEdge;
     typedef std::unordered_multimap<unsigned long, std::shared_ptr<Edge>> HashVertexIdToEdge;
@@ -57,7 +56,7 @@ public:
      * 取得在优化中被判断为outlier部分的边，方便前端去除outlier
      * @param outlier_edges
      */
-    void GetOutlierEdges(std::vector<std::shared_ptr<Edge>> &outlier_edges);
+    void GetOutlierEdges(std::vector<std::shared_ptr<Edge>>& outlier_edges);
 
     /**
      * 求解此问题
@@ -68,18 +67,17 @@ public:
 
     /// 边缘化一个frame和以它为host的landmark
     bool Marginalize(std::shared_ptr<Vertex> frameVertex,
-                     const std::vector<std::shared_ptr<Vertex>> &landmarkVerticies);
+                     const std::vector<std::shared_ptr<Vertex>>& landmarkVerticies);
 
     bool Marginalize(const std::shared_ptr<Vertex> frameVertex);
 
-    //test compute prior
+    // test compute prior
     void TestComputePrior();
 
     std::vector<double>& getAllLambdas() { return allLambdasInIteration; }
-    std::vector<std::pair<int,double>>& getAllLambdasPair() { return allLambdasInIterationPair; }
+    std::vector<std::pair<int, double>>& getAllLambdasPair() { return allLambdasInIterationPair; }
 
 private:
-
     /// Solve的实现，解通用问题
     bool SolveGenericProblem(int iterations);
 
@@ -104,7 +102,7 @@ private:
     /// 更新状态变量
     void UpdateStates();
 
-    void RollbackStates(); // 有时候 update 后残差会变大，需要退回去，重来
+    void RollbackStates();  // 有时候 update 后残差会变大，需要退回去，重来
 
     /// 计算并更新Prior部分
     void ComputePrior();
@@ -140,12 +138,12 @@ private:
     bool IsGoodStepInLM2();
 
     /// PCG 迭代线性求解器
-    VecX PCGSolver(const MatXX &A, const VecX &b, int maxIter);
+    VecX PCGSolver(const MatXX& A, const VecX& b, int maxIter);
 
     double currentLambda_;
     double currentChi_;
-    double stopThresholdLM_;    // LM 迭代退出阈值条件
-    double ni_;                 //控制 Lambda 缩放大小
+    double stopThresholdLM_;  // LM 迭代退出阈值条件
+    double ni_;               //控制 Lambda 缩放大小
 
     ProblemType problemType_;
 
@@ -182,8 +180,8 @@ private:
     ulong ordering_poses_ = 0;
     ulong ordering_landmarks_ = 0;
     ulong ordering_generic_ = 0;
-    std::map<unsigned long, std::shared_ptr<Vertex>> idx_pose_vertices_;        // 以ordering排序的pose顶点
-    std::map<unsigned long, std::shared_ptr<Vertex>> idx_landmark_vertices_;    // 以ordering排序的landmark顶点
+    std::map<unsigned long, std::shared_ptr<Vertex>> idx_pose_vertices_;  // 以ordering排序的pose顶点
+    std::map<unsigned long, std::shared_ptr<Vertex>> idx_landmark_vertices_;  // 以ordering排序的landmark顶点
 
     // verticies need to marg. <Ordering_id_, Vertex>
     HashVertex verticies_marg_;
@@ -196,7 +194,7 @@ private:
     std::vector<std::pair<int, double>> allLambdasInIterationPair;
 };
 
-}
-}
+}  // namespace backend
+}  // namespace myslam
 
 #endif

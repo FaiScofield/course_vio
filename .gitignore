@@ -3,7 +3,7 @@
 */lib/*
 *.a
 *.so
-_clang-format
+*_clang-format
 */.vscode/*
 *.user
 vio_course_data/其他
