@@ -1,0 +1,77 @@
+18:19:52: Starting /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework ...
+Set observation times to 100
+
+Test CurveFitting start...
+iter: 0,	chi = 719.475,	Lambda = 0.001
+iter: 1,	chi = 91.395,	Lambda = 0.000333333
+[INFO] Iteration stops for delta_x too small: 1.19984e-07
+
+problem solve cost: 1.91295 ms
+   makeHessian cost: 1.51697 ms
+
+-------After optimization, we got these parameters :
+ 1.61039  1.61853 0.995178
+-------ground truth: 
+1.0,  2.0,  1.0
+18:19:52: /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework exited with code 0
+
+
+
+18:20:36: Starting /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework ...
+Set observation times to 500
+
+Test CurveFitting start...
+iter: 0,	chi = 155246,	Lambda = 0.621879
+iter: 1,	chi = 497.304,	Lambda = 0.207293
+iter: 2,	chi = 497.299,	Lambda = 0.138195
+[INFO] Iteration stops for delta_x too small: 2.80613e-09
+
+problem solve cost: 14.6041 ms
+   makeHessian cost: 11.8597 ms
+
+-------After optimization, we got these parameters :
+1.01408 1.93612 1.02508
+-------ground truth: 
+1.0,  2.0,  1.0
+18:20:36: /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework exited with code 0
+
+
+
+18:20:46: Starting /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework ...
+Set observation times to 700
+
+Test CurveFitting start...
+iter: 0,	chi = 653482,	Lambda = 3.34941
+iter: 1,	chi = 696.818,	Lambda = 1.11647
+iter: 2,	chi = 696.767,	Lambda = 0.372156
+[INFO] Iteration stops for delta_x too small: 2.33341e-08
+
+problem solve cost: 19.2005 ms
+   makeHessian cost: 15.5042 ms
+
+-------After optimization, we got these parameters :
+ 1.00192  1.98863 0.989354
+-------ground truth: 
+1.0,  2.0,  1.0
+18:20:47: /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework exited with code 0
+
+
+
+18:21:43: Starting /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework ...
+Set observation times to 1000
+
+Test CurveFitting start...
+iter: 0,	chi = 3.21386e+06,	Lambda = 19.95
+iter: 1,	chi = 974.658,	Lambda = 6.65001
+iter: 2,	chi = 973.881,	Lambda = 2.21667
+iter: 3,	chi = 973.88,	Lambda = 1.47778
+[INFO] Iteration stops for delta_x too small: 1.42592e-09
+
+problem solve cost: 36.5084 ms
+   makeHessian cost: 29.7515 ms
+
+-------After optimization, we got these parameters :
+0.999588   2.0063 0.968786
+-------ground truth: 
+1.0,  2.0,  1.0
+18:21:43: /home/vance/vio_ws/src/vio_homework_code/L3/CurveFitting_LM/build/app/CurveFittingHomework exited with code 0

@@ -1,0 +1,20 @@
+vio_imu_1.bag:
+    gyro_noise_sigma = 0.015;
+    gyro_bias_sigma = 5e-5;
+    
+    acc_noise_sigma = 0.019;
+    acc_bias_sigma = 5e-4;
+    
+vio_imu_2.bag:
+    gyro_noise_sigma = 0.35;
+    gyro_bias_sigma = 1e-3;
+    
+    acc_noise_sigma = 0.29;
+    acc_bias_sigma = 3e-2;
+        
+vio_imu_3.bag:
+    gyro_noise_sigma = 0.0075;
+    gyro_bias_sigma = 8e-6;
+    
+    acc_noise_sigma = 0.0042;
+    acc_bias_sigma = 9e-5;

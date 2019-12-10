@@ -1,0 +1,424 @@
+vance@msi:~$ roslaunch imu_utils vio_imu_sim.launch 
+... logging to /home/vance/.ros/log/d96b1710-988d-11e9-9eeb-309c23d574ac/roslaunch-msi-21926.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://msi:38461/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /imu_an/data_save_path: /home/vance/vio_w...
+ * /imu_an/imu_name: vio_imu_1
+ * /imu_an/imu_topic: /imu
+ * /imu_an/max_cluster: 100
+ * /imu_an/max_time_min: 120
+ * /rosdistro: melodic
+ * /rosversion: 1.14.3
+
+NODES
+  /
+    imu_an (imu_utils/imu_an)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[imu_an-1]: started with pid [21941]
+[ INFO] [1561618323.390223493]: Loaded imu_topic: /imu
+[ INFO] [1561618323.390929048]: Loaded imu_name: vio_imu_1
+[ INFO] [1561618323.391218154]: Loaded data_save_path: /home/vance/vio_ws/src/vio_homework_code/L2/imu_utils/data/
+[ INFO] [1561618323.391483884]: Loaded max_time_min: 120
+[ INFO] [1561618323.392119332]: Loaded max_cluster: 100
+gyr x  num of Cluster 100
+gyr y  num of Cluster 100
+gyr z  num of Cluster 100
+acc x  num of Cluster 100
+acc y  num of Cluster 100
+acc z  num of Cluster 100
+wait for imu data.
+gyr x  numData 1438423
+gyr x  start_t 1.56128e+09
+gyr x  end_t 1.56129e+09
+gyr x dt 
+-------------7201.56 s
+-------------120.026 min
+-------------2.00043 h
+gyr x  freq 199.738
+gyr x  period 0.00500657
+gyr y  numData 1438423
+gyr y  start_t 1.56128e+09
+gyr y  end_t 1.56129e+09
+gyr y dt 
+-------------7201.56 s
+-------------120.026 min
+-------------2.00043 h
+gyr y  freq 199.738
+gyr y  period 0.00500657
+gyr z  numData 1438423
+gyr z  start_t 1.56128e+09
+gyr z  end_t 1.56129e+09
+gyr z dt 
+-------------7201.56 s
+-------------120.026 min
+-------------2.00043 h
+gyr z  freq 199.738
+gyr z  period 0.00500657
+Gyro X 
+C -0.815962   3106.32  -15.5399   1.24971 0.0610712
+ Bias Instability 0.00058666 rad/s
+ Bias Instability 0.000833814 rad/s, at 694.031 s
+ White Noise 758.888 rad/s
+ White Noise 0.21089 rad/s
+  bias -0.174725 degree/s
+-------------------
+Gyro y 
+C  -0.686618    3104.02   -36.3673     6.6579 -0.0165823
+ Bias Instability 0.000714154 rad/s
+ Bias Instability 0.00110561 rad/s, at 465.646 s
+ White Noise 760.641 rad/s
+ White Noise 0.211397 rad/s
+  bias 0.135576 degree/s
+-------------------
+Gyro z 
+C 0.0470895    3094.4  -1.52109  -3.48444  0.237401
+ Bias Instability 6.99268e-07 rad/s
+ Bias Instability 0.00081218 rad/s, at 531.903 s
+ White Noise 759.463 rad/s
+ White Noise 0.210974 rad/s
+  bias -0.194921 degree/s
+-------------------
+==============================================
+==============================================
+acc x  numData 1438423
+acc x  start_t 1.56128e+09
+acc x  end_t 1.56129e+09
+acc x dt 
+-------------7201.56 s
+-------------120.026 min
+-------------2.00043 h
+acc x  freq 199.738
+acc x  period 0.00500657
+acc y  numData 1438423
+acc y  start_t 1.56128e+09
+acc y  end_t 1.56129e+09
+acc y dt 
+-------------7201.56 s
+-------------120.026 min
+-------------2.00043 h
+acc y  freq 199.738
+acc y  period 0.00500657
+acc z  numData 1438423
+acc z  start_t 1.56128e+09
+acc z  end_t 1.56129e+09
+acc z dt 
+-------------7201.56 s
+-------------120.026 min
+-------------2.00043 h
+acc z  freq 199.738
+acc z  period 0.00500657
+acc X 
+C -4.72419e-05    0.0195707  -0.00143235  0.000456953 -6.71237e-06
+ Bias Instability 0.00339009 m/s^2
+ White Noise 0.265767 m/s^2
+-------------------
+acc y 
+C -4.29929e-05    0.0195034  -0.00121721  0.000318771 -7.47931e-08
+ Bias Instability 0.00342289 m/s^2
+ White Noise 0.269981 m/s^2
+-------------------
+acc z 
+C -3.55138e-05    0.0194114 -0.000866288   0.00024242  2.62213e-06
+ Bias Instability 0.00335064 m/s^2
+ White Noise 0.266543 m/s^2
+-------------------
+[imu_an-1] process has finished cleanly
+log file: /home/vance/.ros/log/d96b1710-988d-11e9-9eeb-309c23d574ac/imu_an-1*.log
+all processes on machine have died, roslaunch will exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+done
+
+
+vance@msi:~$ roslaunch imu_utils vio_imu_sim.launch 
+... logging to /home/vance/.ros/log/d96b1710-988d-11e9-9eeb-309c23d574ac/roslaunch-msi-21735.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://msi:41215/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /imu_an/data_save_path: /home/vance/vio_w...
+ * /imu_an/imu_name: vio_imu_2
+ * /imu_an/imu_topic: /imu
+ * /imu_an/max_cluster: 100
+ * /imu_an/max_time_min: 120
+ * /rosdistro: melodic
+ * /rosversion: 1.14.3
+
+NODES
+  /
+    imu_an (imu_utils/imu_an)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[imu_an-1]: started with pid [21750]
+[ INFO] [1561618247.674128947]: Loaded imu_topic: /imu
+[ INFO] [1561618247.674945292]: Loaded imu_name: vio_imu_2
+[ INFO] [1561618247.675229573]: Loaded data_save_path: /home/vance/vio_ws/src/vio_homework_code/L2/imu_utils/data/
+[ INFO] [1561618247.675452397]: Loaded max_time_min: 120
+[ INFO] [1561618247.675680356]: Loaded max_cluster: 100
+gyr x  num of Cluster 100
+gyr y  num of Cluster 100
+gyr z  num of Cluster 100
+acc x  num of Cluster 100
+acc y  num of Cluster 100
+acc z  num of Cluster 100
+wait for imu data.
+gyr x  numData 1437684
+gyr x  start_t 1.56161e+09
+gyr x  end_t 1.56162e+09
+gyr x dt 
+-------------7200.5 s
+-------------120.008 min
+-------------2.00014 h
+gyr x  freq 199.664
+gyr x  period 0.00500841
+gyr y  numData 1437684
+gyr y  start_t 1.56161e+09
+gyr y  end_t 1.56162e+09
+gyr y dt 
+-------------7200.5 s
+-------------120.008 min
+-------------2.00014 h
+gyr y  freq 199.664
+gyr y  period 0.00500841
+gyr z  numData 1437684
+gyr z  start_t 1.56161e+09
+gyr z  end_t 1.56162e+09
+gyr z dt 
+-------------7200.5 s
+-------------120.008 min
+-------------2.00014 h
+gyr z  freq 199.664
+gyr z  period 0.00500841
+Gyro X 
+C -18.6605  72520.7 -733.518  114.141  -1.9662
+ Bias Instability 0.0117503 rad/s
+ Bias Instability 0.00484778 rad/s, at 0.00500841 s
+ White Noise 17772 rad/s
+ White Noise 4.93902 rad/s
+  bias -1.52407 degree/s
+-------------------
+Gyro y 
+C  28.4274  71890.5  536.151 -82.3508   4.8916
+ Bias Instability 0.000802592 rad/s
+ Bias Instability 0.00484778 rad/s, at 0.00500841 s
+ White Noise 17677.5 rad/s
+ White Noise 4.9113 rad/s
+  bias 2.48919 degree/s
+-------------------
+Gyro z 
+C  -8.29926   72352.7  -383.802   121.723 -0.880556
+ Bias Instability 0.00566152 rad/s
+ Bias Instability 0.00484778 rad/s, at 0.00500841 s
+ White Noise 17851.4 rad/s
+ White Noise 4.9617 rad/s
+  bias -4.91897 degree/s
+-------------------
+==============================================
+==============================================
+acc x  numData 1437684
+acc x  start_t 1.56161e+09
+acc x  end_t 1.56162e+09
+acc x dt 
+-------------7200.5 s
+-------------120.008 min
+-------------2.00014 h
+acc x  freq 199.664
+acc x  period 0.00500841
+acc y  numData 1437684
+acc y  start_t 1.56161e+09
+acc y  end_t 1.56162e+09
+acc y dt 
+-------------7200.5 s
+-------------120.008 min
+-------------2.00014 h
+acc y  freq 199.664
+acc y  period 0.00500841
+acc z  numData 1437684
+acc z  start_t 1.56161e+09
+acc z  end_t 1.56162e+09
+acc z dt 
+-------------7200.5 s
+-------------120.008 min
+-------------2.00014 h
+acc z  freq 199.664
+acc z  period 0.00500841
+acc X 
+C   -0.0028817     0.323376   -0.0811161    0.0285189 -6.32776e-05
+ Bias Instability 0.116377 m/s^2
+ White Noise 4.25157 m/s^2
+-------------------
+acc y 
+C   -0.0035755     0.330353   -0.0949024    0.0293755 -0.000219241
+ Bias Instability 0.104436 m/s^2
+ White Noise 4.18849 m/s^2
+-------------------
+acc z 
+C -0.00142002     0.30628  -0.0375941   0.0148054 0.000244098
+ Bias Instability 0.0975518 m/s^2
+ White Noise 4.12798 m/s^2
+-------------------
+[imu_an-1] process has finished cleanly
+log file: /home/vance/.ros/log/d96b1710-988d-11e9-9eeb-309c23d574ac/imu_an-1*.log
+all processes on machine have died, roslaunch will exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+done
+
+
+vance@msi:~$ roslaunch imu_utils vio_imu_sim.launch 
+... logging to /home/vance/.ros/log/d96b1710-988d-11e9-9eeb-309c23d574ac/roslaunch-msi-21661.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://msi:44887/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /imu_an/data_save_path: /home/vance/vio_w...
+ * /imu_an/imu_name: vio_imu_3
+ * /imu_an/imu_topic: /imu
+ * /imu_an/max_cluster: 100
+ * /imu_an/max_time_min: 120
+ * /rosdistro: melodic
+ * /rosversion: 1.14.3
+
+NODES
+  /
+    imu_an (imu_utils/imu_an)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[imu_an-1]: started with pid [21676]
+[ INFO] [1561618066.666993289]: Loaded imu_topic: /imu
+[ INFO] [1561618066.667762035]: Loaded imu_name: vio_imu_3
+[ INFO] [1561618066.668074478]: Loaded data_save_path: /home/vance/vio_ws/src/vio_homework_code/L2/imu_utils/data/
+[ INFO] [1561618066.668356709]: Loaded max_time_min: 120
+[ INFO] [1561618066.668638701]: Loaded max_cluster: 100
+gyr x  num of Cluster 100
+gyr y  num of Cluster 100
+gyr z  num of Cluster 100
+acc x  num of Cluster 100
+acc y  num of Cluster 100
+acc z  num of Cluster 100
+wait for imu data.
+gyr x  numData 1439892
+gyr x  start_t 1.56161e+09
+gyr x  end_t 1.56162e+09
+gyr x dt 
+-------------7201.26 s
+-------------120.021 min
+-------------2.00035 h
+gyr x  freq 199.95
+gyr x  period 0.00500125
+gyr y  numData 1439892
+gyr y  start_t 1.56161e+09
+gyr y  end_t 1.56162e+09
+gyr y dt 
+-------------7201.26 s
+-------------120.021 min
+-------------2.00035 h
+gyr y  freq 199.95
+gyr y  period 0.00500125
+gyr z  numData 1439892
+gyr z  start_t 1.56161e+09
+gyr z  end_t 1.56162e+09
+gyr z dt 
+-------------7201.26 s
+-------------120.021 min
+-------------2.00035 h
+gyr z  freq 199.95
+gyr z  period 0.00500125
+Gyro X 
+C   0.54193   1541.61   9.50528  -1.10088 0.0231248
+ Bias Instability 2.25519e-06 rad/s
+ Bias Instability 0.000185569 rad/s, at 2622.1 s
+ White Noise 378.923 rad/s
+ White Noise 0.105269 rad/s
+  bias 0.0348909 degree/s
+-------------------
+Gyro y 
+C -0.485275   1551.74   5.85477  -1.41083 0.0299017
+ Bias Instability 6.4742e-06 rad/s
+ Bias Instability 0.000177384 rad/s, at 2622.1 s
+ White Noise 371.816 rad/s
+ White Noise 0.103293 rad/s
+  bias -0.0172221 degree/s
+-------------------
+Gyro z 
+C  0.0337296    1548.61   -12.1285     1.9875 -0.0362776
+ Bias Instability 0.000414314 rad/s
+ Bias Instability 0.000320489 rad/s, at 2622.1 s
+ White Noise 377.329 rad/s
+ White Noise 0.104886 rad/s
+  bias 0.0114544 degree/s
+-------------------
+==============================================
+==============================================
+acc x  numData 1439892
+acc x  start_t 1.56161e+09
+acc x  end_t 1.56162e+09
+acc x dt 
+-------------7201.26 s
+-------------120.021 min
+-------------2.00035 h
+acc x  freq 199.95
+acc x  period 0.00500125
+acc y  numData 1439892
+acc y  start_t 1.56161e+09
+acc y  end_t 1.56162e+09
+acc y dt 
+-------------7201.26 s
+-------------120.021 min
+-------------2.00035 h
+acc y  freq 199.95
+acc y  period 0.00500125
+acc z  numData 1439892
+acc z  start_t 1.56161e+09
+acc z  end_t 1.56162e+09
+acc z dt 
+-------------7201.26 s
+-------------120.021 min
+-------------2.00035 h
+acc z  freq 199.95
+acc z  period 0.00500125
+acc X 
+C -3.94329e-06   0.00424331 -9.78382e-05  2.99095e-05  8.61578e-08
+ Bias Instability 0.000600534 m/s^2
+ White Noise 0.058985 m/s^2
+-------------------
+acc y 
+C -1.22309e-07   0.00420866 -4.34554e-05  1.88933e-05  1.18442e-06
+ Bias Instability 0.00066547 m/s^2
+ White Noise 0.0592401 m/s^2
+-------------------
+acc z 
+C -1.17915e-06   0.00421871 -8.56054e-05  3.39092e-05  1.01784e-07
+ Bias Instability 0.000647006 m/s^2
+ White Noise 0.0585179 m/s^2
+-------------------
+[imu_an-1] process has finished cleanly
+log file: /home/vance/.ros/log/d96b1710-988d-11e9-9eeb-309c23d574ac/imu_an-1*.log
+all processes on machine have died, roslaunch will exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+done

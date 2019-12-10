@@ -1,0 +1,12 @@
+*/bin/*
+*/build/*
+*/lib/*
+*.a
+*.so
+_clang-format
+*/.vscode/*
+*.user
+vio_course_data/其他
+其他
+vio_homework_code/L2/kalibr_allan/data
+
