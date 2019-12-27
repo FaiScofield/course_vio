@@ -1,9 +1,10 @@
-#include <iostream>
-#include <fstream>
-#include <eigen3/Eigen/Dense>
-#include <glog/logging.h>
 #include "backend/problem.h"
 #include "utils/tic_toc.h"
+#include <eigen3/Eigen/Dense>
+#include <fstream>
+#include <glog/logging.h>
+#include <iostream>
+#include <iomanip>
 
 #ifdef USE_OPENMP
 
@@ -16,28 +17,34 @@ using namespace std;
 // define the format you want, you only need one instance of this...
 const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
 
-void writeToCSVfile(std::string name, Eigen::MatrixXd matrix) {
+void writeToCSVfile(std::string name, Eigen::MatrixXd matrix)
+{
     std::ofstream f(name.c_str());
     f << matrix.format(CSVFormat);
 }
 
-namespace myslam {
-namespace backend {
-void Problem::LogoutVectorSize() {
-    // LOG(INFO) <<
-    //           "1 problem::LogoutVectorSize verticies_:" << verticies_.size() <<
-    //           " edges:" << edges_.size();
+namespace myslam
+{
+namespace backend
+{
+
+void Problem::LogoutVectorSize()
+{
+//    LOG(INFO) << "1 problem:: LogoutVectorSize verticies_:" << verticies_.size()
+//              << " edges:" << edges_.size();
 }
 
-Problem::Problem(ProblemType problemType) :
-    problemType_(problemType) {
+Problem::Problem(ProblemType problemType) : problemType_(problemType)
+{
     LogoutVectorSize();
     verticies_marg_.clear();
 }
 
-Problem::~Problem() {}
+Problem::~Problem()
+{}
 
-bool Problem::AddVertex(std::shared_ptr<Vertex> vertex) {
+bool Problem::AddVertex(std::shared_ptr<Vertex> vertex)
+{
     if (verticies_.find(vertex->Id()) != verticies_.end()) {
         // LOG(WARNING) << "Vertex " << vertex->Id() << " has been added before";
         return false;
@@ -53,7 +60,8 @@ bool Problem::AddVertex(std::shared_ptr<Vertex> vertex) {
     return true;
 }
 
-void Problem::AddOrderingSLAM(std::shared_ptr<myslam::backend::Vertex> v) {
+void Problem::AddOrderingSLAM(std::shared_ptr<myslam::backend::Vertex> v)
+{
     if (IsPoseVertex(v)) {
         v->SetOrderingId(ordering_poses_);
         idx_pose_vertices_.insert(pair<ulong, std::shared_ptr<Vertex>>(v->Id(), v));
@@ -65,7 +73,8 @@ void Problem::AddOrderingSLAM(std::shared_ptr<myslam::backend::Vertex> v) {
     }
 }
 
-void Problem::ResizePoseHessiansWhenAddingPose(shared_ptr<Vertex> v) {
+void Problem::ResizePoseHessiansWhenAddingPose(shared_ptr<Vertex> v)
+{
 
     int size = H_prior_.rows() + v->LocalDimension();
     H_prior_.conservativeResize(size, size);
@@ -74,21 +83,22 @@ void Problem::ResizePoseHessiansWhenAddingPose(shared_ptr<Vertex> v) {
     b_prior_.tail(v->LocalDimension()).setZero();
     H_prior_.rightCols(v->LocalDimension()).setZero();
     H_prior_.bottomRows(v->LocalDimension()).setZero();
-
 }
 
-bool Problem::IsPoseVertex(std::shared_ptr<myslam::backend::Vertex> v) {
+bool Problem::IsPoseVertex(std::shared_ptr<myslam::backend::Vertex> v)
+{
     string type = v->TypeInfo();
     return type == string("VertexPose");
 }
 
-bool Problem::IsLandmarkVertex(std::shared_ptr<myslam::backend::Vertex> v) {
+bool Problem::IsLandmarkVertex(std::shared_ptr<myslam::backend::Vertex> v)
+{
     string type = v->TypeInfo();
-    return type == string("VertexPointXYZ") ||
-           type == string("VertexInverseDepth");
+    return type == string("VertexPointXYZ") || type == string("VertexInverseDepth");
 }
 
-bool Problem::AddEdge(shared_ptr<Edge> edge) {
+bool Problem::AddEdge(shared_ptr<Edge> edge)
+{
     if (edges_.find(edge->Id()) == edges_.end()) {
         edges_.insert(pair<ulong, std::shared_ptr<Edge>>(edge->Id(), edge));
     } else {
@@ -96,17 +106,17 @@ bool Problem::AddEdge(shared_ptr<Edge> edge) {
         return false;
     }
 
-    for (auto &vertex: edge->Verticies()) {
+    for (auto& vertex : edge->Verticies()) {
         vertexToEdge_.insert(pair<ulong, shared_ptr<Edge>>(vertex->Id(), edge));
     }
     return true;
 }
 
-vector<shared_ptr<Edge>> Problem::GetConnectedEdges(std::shared_ptr<Vertex> vertex) {
+vector<shared_ptr<Edge>> Problem::GetConnectedEdges(std::shared_ptr<Vertex> vertex)
+{
     vector<shared_ptr<Edge>> edges;
     auto range = vertexToEdge_.equal_range(vertex->Id());
     for (auto iter = range.first; iter != range.second; ++iter) {
-
         // 并且这个edge还需要存在，而不是已经被remove了
         if (edges_.find(iter->second->Id()) == edges_.end())
             continue;
@@ -116,10 +126,11 @@ vector<shared_ptr<Edge>> Problem::GetConnectedEdges(std::shared_ptr<Vertex> vert
     return edges;
 }
 
-bool Problem::RemoveVertex(std::shared_ptr<Vertex> vertex) {
-    //check if the vertex is in map_verticies_
+bool Problem::RemoveVertex(std::shared_ptr<Vertex> vertex)
+{
+    // check if the vertex is in map_verticies_
     if (verticies_.find(vertex->Id()) == verticies_.end()) {
-        // LOG(WARNING) << "The vertex " << vertex->Id() << " is not in the problem!" << endl;
+        LOG(WARNING) << "The vertex " << vertex->Id() << " is not in the problem!" << endl;
         return false;
     }
 
@@ -134,17 +145,18 @@ bool Problem::RemoveVertex(std::shared_ptr<Vertex> vertex) {
     else
         idx_landmark_vertices_.erase(vertex->Id());
 
-    vertex->SetOrderingId(-1);      // used to debug
+    vertex->SetOrderingId(-1);  // used to debug
     verticies_.erase(vertex->Id());
     vertexToEdge_.erase(vertex->Id());
 
     return true;
 }
 
-bool Problem::RemoveEdge(std::shared_ptr<Edge> edge) {
-    //check if the edge is in map_edges_
+bool Problem::RemoveEdge(std::shared_ptr<Edge> edge)
+{
+    // check if the edge is in map_edges_
     if (edges_.find(edge->Id()) == edges_.end()) {
-        // LOG(WARNING) << "The edge " << edge->Id() << " is not in the problem!" << endl;
+        LOG(WARNING) << "The edge " << edge->Id() << " is not in the problem!" << endl;
         return false;
     }
 
@@ -152,61 +164,75 @@ bool Problem::RemoveEdge(std::shared_ptr<Edge> edge) {
     return true;
 }
 
-bool Problem::Solve(int iterations) {
-
+bool Problem::Solve(int iterations)
+{
     if (edges_.size() == 0 || verticies_.size() == 0) {
         std::cerr << "\nCannot solve problem without edges or verticies" << std::endl;
         return false;
     }
 
     TicToc t_solve;
+
     // 统计优化变量的维数，为构建 H 矩阵做准备
     SetOrdering();
+
     // 遍历edge, 构建 H 矩阵
     MakeHessian();
+
     // LM 初始化
     ComputeLambdaInitLM();
+
     // LM 算法迭代求解
     bool stop = false;
     int iter = 0;
+    std::cout << setiosflags(ios::fixed) << setprecision(6);  // 设置浮点数保留6位小数
     while (!stop && (iter < iterations)) {
-        std::cout << "iter: " << iter << " , chi= " << currentChi_ << " , Lambda= " << currentLambda_ << std::endl;
+        std::cout << "iter: " << iter << ",\tchi = " << currentChi_
+                  << ",\tLambda = " << currentLambda_ << std::endl;
         bool oneStepSuccess = false;
         int false_cnt = 0;
-        while (!oneStepSuccess)  // 不断尝试 Lambda, 直到成功迭代一步
-        {
+        while (!oneStepSuccess) { // 不断尝试 Lambda, 直到成功迭代一步
             // setLambda
-//            AddLambdatoHessianLM();
+            // AddLambdatoHessianLM();
+
             // 第四步，解线性方程
-            SolveLinearSystem();    // AddLambdatoHessianLM()放到这里了
-            //
-//            RemoveLambdaHessianLM();
+            SolveLinearSystem();  // AddLambdatoHessianLM()放到这里了
+
+            // RemoveLambdaHessianLM();
 
             // 优化退出条件1： delta_x_ 很小则退出
             if (delta_x_.squaredNorm() <= 1e-6 || false_cnt > 10) {
+                if (delta_x_.squaredNorm() <= 1e-6)
+                    cout << "[INFO] Iteration stops for delta_x too small: " << delta_x_.squaredNorm() << endl;
+                if (false_cnt > 10)
+                    cerr << "[ERROR] Iteration stops for 10 times increasing error." << endl;
+
                 stop = true;
                 break;
             }
 
             // 更新状态量
             UpdateStates();
+
             // 判断当前步是否可行以及 LM 的 lambda 怎么更新
             oneStepSuccess = IsGoodStepInLM();
+
             // 后续处理，
             if (oneStepSuccess) {
                 // 在新线性化点 构建 hessian
                 MakeHessian();
-                // TODO:: 这个判断条件可以丢掉，条件 b_max <= 1e-12 很难达到，这里的阈值条件不应该用绝对值，而是相对值
-//                double b_max = 0.0;
-//                for (int i = 0; i < b_.size(); ++i) {
-//                    b_max = max(fabs(b_(i)), b_max);
-//                }
-//                // 优化退出条件2： 如果残差 b_max 已经很小了，那就退出
-//                stop = (b_max <= 1e-12);
+                // TODO:: 这个判断条件可以丢掉，条件 b_max <= 1e-12
+                // 很难达到，这里的阈值条件不应该用绝对值，而是相对值
+                //                double b_max = 0.0;
+                //                for (int i = 0; i < b_.size(); ++i) {
+                //                    b_max = max(fabs(b_(i)), b_max);
+                //                }
+                //                // 优化退出条件2： 如果残差 b_max 已经很小了，那就退出
+                //                stop = (b_max <= 1e-6);
                 false_cnt = 0;
             } else {
-                false_cnt ++;
-                RollbackStates();   // 误差没下降，回滚
+                false_cnt++;
+                RollbackStates();  // 误差没下降，回滚
             }
         }
         iter++;
@@ -220,8 +246,8 @@ bool Problem::Solve(int iterations) {
     return true;
 }
 
-void Problem::SetOrdering() {
-
+void Problem::SetOrdering()
+{
     // 每次重新计数
     ordering_poses_ = 0;
     ordering_generic_ = 0;
@@ -236,8 +262,8 @@ void Problem::SetOrdering() {
             debug += vertex.second->LocalDimension();
         }
 
-        if (problemType_ == ProblemType::SLAM_PROBLEM)    // 如果是 slam 问题，还要分别统计 pose 和 landmark 的维数，后面会对他们进行排序
-        {
+        // 如果是 slam 问题，还要分别统计 pose 和 landmark 的维数，后面会对他们进行排序
+        if (problemType_ == ProblemType::SLAM_PROBLEM) {
             AddOrderingSLAM(vertex.second);
         }
 
@@ -248,27 +274,26 @@ void Problem::SetOrdering() {
 
     std::cout << "\nordered_landmark_vertices_ size : " << idx_landmark_vertices_.size() << std::endl;
     if (problemType_ == ProblemType::SLAM_PROBLEM) {
-        // 这里要把 landmark 的 ordering 加上 pose 的数量，就保持了 landmark 在后,而 pose 在前
+        // 这里要把 landmark 的 ordering 加上 pose 的数量，就保持了 landmark 在后, 而 pose 在前
         ulong all_pose_dimension = ordering_poses_;
         for (auto landmarkVertex : idx_landmark_vertices_) {
-            landmarkVertex.second->SetOrderingId(
-                landmarkVertex.second->OrderingId() + all_pose_dimension
-            );
+            landmarkVertex.second->SetOrderingId(landmarkVertex.second->OrderingId() + all_pose_dimension);
         }
     }
 
-//    CHECK_EQ(CheckOrdering(), true);
+    //    CHECK_EQ(CheckOrdering(), true);
 }
 
-bool Problem::CheckOrdering() {
+bool Problem::CheckOrdering()
+{
     if (problemType_ == ProblemType::SLAM_PROBLEM) {
         int current_ordering = 0;
-        for (auto v: idx_pose_vertices_) {
+        for (auto v : idx_pose_vertices_) {
             assert(v.second->OrderingId() == current_ordering);
             current_ordering += v.second->LocalDimension();
         }
 
-        for (auto v: idx_landmark_vertices_) {
+        for (auto v : idx_landmark_vertices_) {
             assert(v.second->OrderingId() == current_ordering);
             current_ordering += v.second->LocalDimension();
         }
@@ -276,15 +301,16 @@ bool Problem::CheckOrdering() {
     return true;
 }
 
-void Problem::MakeHessian() {
+void Problem::MakeHessian()
+{
     TicToc t_h;
+
     // 直接构造大的 H 矩阵
     ulong size = ordering_generic_;
     MatXX H(MatXX::Zero(size, size));
     VecX b(VecX::Zero(size));
 
-    for (auto &edge: edges_) {
-
+    for (auto& edge : edges_) {
         edge.second->ComputeResidual();
         edge.second->ComputeJacobians();
 
@@ -293,7 +319,8 @@ void Problem::MakeHessian() {
         assert(jacobians.size() == verticies.size());
         for (size_t i = 0; i < verticies.size(); ++i) {
             auto v_i = verticies[i];
-            if (v_i->IsFixed()) continue;    // Hessian 里不需要添加它的信息，也就是它的雅克比为 0
+            if (v_i->IsFixed())
+                continue;  // Hessian 里不需要添加它的信息，也就是它的雅克比为 0
 
             auto jacobian_i = jacobians[i];
             ulong index_i = v_i->OrderingId();
@@ -303,7 +330,8 @@ void Problem::MakeHessian() {
             for (size_t j = i; j < verticies.size(); ++j) {
                 auto v_j = verticies[j];
 
-                if (v_j->IsFixed()) continue;
+                if (v_j->IsFixed())
+                    continue;
 
                 auto jacobian_j = jacobians[j];
                 ulong index_j = v_j->OrderingId();
@@ -322,46 +350,43 @@ void Problem::MakeHessian() {
             }
             b.segment(index_i, dim_i).noalias() -= JtW * edge.second->Residual();
         }
-
     }
     Hessian_ = H;
     b_ = b;
     t_hessian_cost_ += t_h.toc();
 
 
-//    Eigen::JacobiSVD<Eigen::MatrixXd> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
-//    std::cout << svd.singularValues() <<std::endl;
+    //    Eigen::JacobiSVD<Eigen::MatrixXd> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    //    std::cout << svd.singularValues() <<std::endl;
 
     if (err_prior_.rows() > 0) {
-        b_prior_ -= H_prior_ * delta_x_.head(ordering_poses_);   // update the error_prior
+        b_prior_ -= H_prior_ * delta_x_.head(ordering_poses_);  // update the error_prior
     }
     Hessian_.topLeftCorner(ordering_poses_, ordering_poses_) += H_prior_;
     b_.head(ordering_poses_) += b_prior_;
 
     delta_x_ = VecX::Zero(size);  // initial delta_x = 0_n;
-
 }
 
 /*
  * Solve Hx = b, we can use PCG iterative method or use sparse Cholesky
  */
-void Problem::SolveLinearSystem() {
+void Problem::SolveLinearSystem()
+{
 
-    if (problemType_ == ProblemType::GENERIC_PROBLEM) {
-        // 非 SLAM 问题直接求解
+    if (problemType_ == ProblemType::GENERIC_PROBLEM) {  // 非 SLAM 问题直接求解
         // PCG solver
-        MatXX H = Hessian_;
+        MatXX& H = Hessian_;
         for (ulong i = 0; i < Hessian_.cols(); ++i) {
             H(i, i) += currentLambda_;
         }
-//        delta_x_ = PCGSolver(H, b_, H.rows() * 2);
+        // delta_x_ = PCGSolver(H, b_, H.rows() * 2);
         delta_x_ = Hessian_.inverse() * b_;
+    } else {  // SLAM 问题采用舒尔补的计算方式
 
-    } else {
-        // SLAM 问题采用舒尔补的计算方式
         // step1: schur marginalization --> Hpp, bpp
-        int reserve_size = ordering_poses_;
-        int marg_size = ordering_landmarks_;
+        const int reserve_size = ordering_poses_;
+        const int marg_size = ordering_landmarks_;
 
         // TODO:: home work. 完成矩阵块取值，Hmm，Hpm，Hmp，bpp，bmm
         MatXX Hmm = Hessian_.block(reserve_size, reserve_size, marg_size, marg_size);
@@ -370,7 +395,8 @@ void Problem::SolveLinearSystem() {
         VecX bpp = b_.segment(0, reserve_size);
         VecX bmm = b_.segment(reserve_size, marg_size);
 
-        // Hmm 是对角线矩阵，它的求逆可以直接为对角线块分别求逆，如果是逆深度，对角线块为1维的，则直接为对角线的倒数，这里可以加速
+        // Hmm
+        // 是对角线矩阵，它的求逆可以直接为对角线块分别求逆，如果是逆深度，对角线块为1维的，则直接为对角线的倒数，这里可以加速
         MatXX Hmm_inv(MatXX::Zero(marg_size, marg_size));
         for (auto landmarkVertex : idx_landmark_vertices_) {
             int idx = landmarkVertex.second->OrderingId() - reserve_size;
@@ -390,60 +416,60 @@ void Problem::SolveLinearSystem() {
             H_pp_schur_(i, i) += currentLambda_;
         }
 
-        int n = H_pp_schur_.rows() * 2;                       // 迭代次数
+        int n = H_pp_schur_.rows() * 2;  // 迭代次数
         delta_x_pp = PCGSolver(H_pp_schur_, b_pp_schur_, n);  // 哈哈，小规模问题，搞 pcg 花里胡哨
         delta_x_.head(reserve_size) = delta_x_pp;
-        //        std::cout << delta_x_pp.transpose() << std::endl;
+        // std::cout << delta_x_pp.transpose() << std::endl;
 
         // TODO:: home work. step3: solve landmark
         VecX delta_x_ll(marg_size);
         delta_x_ll = Hmm_inv * (bmm - Hmp * delta_x_pp);
         delta_x_.tail(marg_size) = delta_x_ll;
-
     }
-
 }
 
-void Problem::UpdateStates() {
-    for (auto vertex: verticies_) {
+void Problem::UpdateStates()
+{
+    for (auto vertex : verticies_) {
         ulong idx = vertex.second->OrderingId();
         ulong dim = vertex.second->LocalDimension();
         VecX delta = delta_x_.segment(idx, dim);
         vertex.second->Plus(delta);
     }
     if (err_prior_.rows() > 0) {
-        b_prior_ -= H_prior_ * delta_x_.head(ordering_poses_);   // update the error_prior
+        b_prior_ -= H_prior_ * delta_x_.head(ordering_poses_);  // update the error_prior
         err_prior_ = Jt_prior_inv_ * b_prior_.head(ordering_poses_ - 6);
     }
-
 }
 
-void Problem::RollbackStates() {
-    for (auto vertex: verticies_) {
+void Problem::RollbackStates()
+{
+    for (auto vertex : verticies_) {
         ulong idx = vertex.second->OrderingId();
         ulong dim = vertex.second->LocalDimension();
         VecX delta = delta_x_.segment(idx, dim);
         vertex.second->Plus(-delta);
     }
     if (err_prior_.rows() > 0) {
-        b_prior_ += H_prior_ * delta_x_.head(ordering_poses_);   // update the error_prior
+        b_prior_ += H_prior_ * delta_x_.head(ordering_poses_);  // update the error_prior
         err_prior_ = Jt_prior_inv_ * b_prior_.head(ordering_poses_ - 6);
     }
 }
 
 /// LM
-void Problem::ComputeLambdaInitLM() {
+void Problem::ComputeLambdaInitLM()
+{
     ni_ = 2.;
     currentLambda_ = -1.;
     currentChi_ = 0.0;
     // TODO:: robust cost chi2
-    for (auto edge: edges_) {
+    for (auto edge : edges_) {
         currentChi_ += edge.second->Chi2();
     }
-    if (err_prior_.rows() > 0)      // marg prior residual
+    if (err_prior_.rows() > 0)  // marg prior residual
         currentChi_ += err_prior_.norm();
 
-    stopThresholdLM_ = 1e-6 * currentChi_;          // 迭代条件为 误差下降 1e-6 倍
+    stopThresholdLM_ = 1e-6 * currentChi_;  // 迭代条件为 误差下降 1e-6 倍
 
     double maxDiagonal = 0;
     ulong size = Hessian_.cols();
@@ -455,7 +481,8 @@ void Problem::ComputeLambdaInitLM() {
     currentLambda_ = tau * maxDiagonal;
 }
 
-void Problem::AddLambdatoHessianLM() {
+void Problem::AddLambdaToHessianLM()
+{
     ulong size = Hessian_.cols();
     assert(Hessian_.rows() == Hessian_.cols() && "Hessian is not square");
     for (ulong i = 0; i < size; ++i) {
@@ -463,24 +490,27 @@ void Problem::AddLambdatoHessianLM() {
     }
 }
 
-void Problem::RemoveLambdaHessianLM() {
+void Problem::RemoveLambdaHessianLM()
+{
     ulong size = Hessian_.cols();
     assert(Hessian_.rows() == Hessian_.cols() && "Hessian is not square");
-    // TODO:: 这里不应该减去一个，数值的反复加减容易造成数值精度出问题？而应该保存叠加lambda前的值，在这里直接赋值
+    // TODO::
+    // 这里不应该减去一个，数值的反复加减容易造成数值精度出问题？而应该保存叠加lambda前的值，在这里直接赋值
     for (ulong i = 0; i < size; ++i) {
         Hessian_(i, i) -= currentLambda_;
     }
 }
 
-bool Problem::IsGoodStepInLM() {
+bool Problem::IsGoodStepInLM()
+{
     double scale = 0;
     scale = delta_x_.transpose() * (currentLambda_ * delta_x_ + b_);
-    scale += 1e-3;    // make sure it's non-zero :)
+    scale += 1e-3;  // make sure it's non-zero :)
 
     // recompute residuals after update state
     // TODO:: get robustChi2() instead of Chi2()
     double tempChi = 0.0;
-    for (auto edge: edges_) {
+    for (auto edge : edges_) {
         edge.second->ComputeResidual();
         tempChi += edge.second->Chi2();
     }
@@ -488,8 +518,7 @@ bool Problem::IsGoodStepInLM() {
         tempChi += err_prior_.norm();
 
     double rho = (currentChi_ - tempChi) / scale;
-    if (rho > 0 && isfinite(tempChi))   // last step was good, 误差在下降
-    {
+    if (rho > 0 && isfinite(tempChi)) { // last step was good, 误差在下降
         double alpha = 1. - pow((2 * rho - 1), 3);
         alpha = std::min(alpha, 2. / 3.);
         double scaleFactor = (std::max)(1. / 3., alpha);
@@ -509,7 +538,8 @@ bool Problem::IsGoodStepInLM() {
  *  the jacobi PCG method
  *
  */
-VecX Problem::PCGSolver(const MatXX &A, const VecX &b, int maxIter = -1) {
+VecX Problem::PCGSolver(const MatXX& A, const VecX& b, int maxIter = -1)
+{
     assert(A.rows() == A.cols() && "PCG solver ERROR: A is not a square matrix");
     int rows = static_cast<int>(b.rows());
     int n = maxIter < 0 ? rows : maxIter;
@@ -545,28 +575,28 @@ VecX Problem::PCGSolver(const MatXX &A, const VecX &b, int maxIter = -1) {
  *  marg 所有和 frame 相连的 edge: imu factor, projection factor， prior factor
  *
  */
-bool Problem::Marginalize(const std::shared_ptr<Vertex> frameVertex) {
+bool Problem::Marginalize(const std::shared_ptr<Vertex> frameVertex)
+{
 
     return true;
 }
 
 
-void Problem::TestMarginalize() {
-
+void Problem::TestMarginalize()
+{
     // Add marg test
-    int idx = 1;            // marg 中间那个变量
-    int dim = 1;            // marg 变量的维度
-    int reserve_size = 3;   // 总共变量的维度
+    int idx = 1;  // marg 中间那个变量
+    int dim = 1;  // marg 变量的维度
+    int reserve_size = 3;  // 总共变量的维度
     double delta1 = 0.1 * 0.1;
     double delta2 = 0.2 * 0.2;
     double delta3 = 0.3 * 0.3;
 
     int cols = 3;
     MatXX H_marg(MatXX::Zero(cols, cols));
-    H_marg << 1./delta1, -1./delta1, 0,
-            -1./delta1, 1./delta1 + 1./delta2 + 1./delta3, -1./delta3,
-            0.,  -1./delta3, 1/delta3;
-    std::cout << "\n---------- TEST Marg: before marg------------"<< std::endl;
+    H_marg << 1. / delta1, -1. / delta1, 0, -1. / delta1, 1. / delta1 + 1. / delta2 + 1. / delta3,
+        -1. / delta3, 0., -1. / delta3, 1 / delta3;
+    std::cout << "\n---------- TEST Marg: before marg------------" << std::endl;
     std::cout << H_marg << std::endl;
 
     // TODO:: home work. 将变量移动到右下角
@@ -583,37 +613,33 @@ void Problem::TestMarginalize() {
     H_marg.block(0, idx, reserve_size, reserve_size - idx - dim) = temp_rightCols;
     H_marg.block(0, reserve_size - dim, reserve_size, dim) = temp_cols;
 
-    std::cout << "---------- TEST Marg: 将变量移动到右下角------------"<< std::endl;
-    std::cout<< H_marg <<std::endl;
+    std::cout << "---------- TEST Marg: 将中间变量移动到右下角------------" << std::endl;
+    std::cout << H_marg << std::endl;
 
     /// 开始 marg ： schur
     double eps = 1e-8;
     int m2 = dim;
-    int n2 = reserve_size - dim;   // 剩余变量的维度
+    int n2 = reserve_size - dim;  // 剩余变量的维度
     Eigen::MatrixXd Amm = 0.5 * (H_marg.block(n2, n2, m2, m2) + H_marg.block(n2, n2, m2, m2).transpose());
 
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> saes(Amm);
-    Eigen::MatrixXd Amm_inv = saes.eigenvectors() * Eigen::VectorXd(
-            (saes.eigenvalues().array() > eps).select(saes.eigenvalues().array().inverse(), 0)).asDiagonal() *
-                              saes.eigenvectors().transpose();
+    Eigen::MatrixXd Amm_inv =
+        saes.eigenvectors() *
+        Eigen::VectorXd((saes.eigenvalues().array() > eps).select(saes.eigenvalues().array().inverse(), 0))
+            .asDiagonal() *
+        saes.eigenvectors().transpose();
 
     // TODO:: home work. 完成舒尔补操作
-    Eigen::MatrixXd Arm = H_marg.block(0,n2,n2,m2);
-    Eigen::MatrixXd Amr = H_marg.block(n2,0,m2,n2);
-    Eigen::MatrixXd Arr = H_marg.block(0,0,n2,n2);
+    Eigen::MatrixXd Arm = H_marg.block(0, n2, n2, m2);
+    Eigen::MatrixXd Amr = H_marg.block(n2, 0, m2, n2);
+    Eigen::MatrixXd Arr = H_marg.block(0, 0, n2, n2);
 
     Eigen::MatrixXd tempB = Arm * Amm_inv;
     Eigen::MatrixXd H_prior = Arr - tempB * Amr;
 
-    std::cout << "---------- TEST Marg: after marg------------"<< std::endl;
+    std::cout << "---------- TEST Marg: after marg------------" << std::endl;
     std::cout << H_prior << std::endl;
 }
 
 }
 }
-
-
-
-
-
-

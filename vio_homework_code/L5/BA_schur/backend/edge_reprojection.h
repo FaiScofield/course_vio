@@ -14,9 +14,9 @@ namespace backend {
 
 /**
  * 此边是视觉重投影误差，此边为三元边，与之相连的顶点有：
- * 路标点的逆深度InveseDepth、第一次观测到该路标点的source Camera的位姿T_World_From_Body1，
- * 和观测到该路标点的mearsurement Camera位姿T_World_From_Body2。
- * 注意：verticies_顶点顺序必须为InveseDepth、T_World_From_Body1、T_World_From_Body2。
+ * 路标点的逆深度InveseDepth、第一次观测到该路标点的source Camera的位姿T_World_From_Body1, 即Twc1
+ * 和观测到该路标点的mearsurement Camera位姿T_World_From_Body2, 即Twc2
+ * 注意：verticies_顶点顺序必须为InveseDepth、T_World_From_Body1、T_World_From_Body2
  */
 class EdgeReprojection : public Edge {
 public:

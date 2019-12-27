@@ -12,6 +12,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 
 FIND_PACKAGE( OpenMP REQUIRED)
 if(OPENMP_FOUND)
@@ -44,9 +45,16 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Glog REQUIRED)
 include_directories(${GLOG_INCLUDE_DIRS})
 
-
 # sophus
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty/Sophus)
+
+# g2o
+find_package(G2O REQUIRED)
+include_directories(${CHOLMOD_INCLUDE_DIR} ${G2O_INCLUDE_DIR})
+SET(G2O_LIBS
+    g2o_cli g2o_types_sba g2o_types_slam3d g2o_core g2o_solver_csparse
+    g2o_csparse_extension g2o_stuff  g2o_parser  g2o_types_data
+)
 
 include_directories(${PROJECT_SOURCE_DIR})
 

@@ -1,9 +1,9 @@
-#include <iostream>
-#include <fstream>
-#include <eigen3/Eigen/Dense>
-#include <glog/logging.h>
 #include "backend/problem.h"
 #include "utils/tic_toc.h"
+#include <eigen3/Eigen/Dense>
+#include <fstream>
+#include <glog/logging.h>
+#include <iostream>
 
 #ifdef USE_OPENMP
 
@@ -14,23 +14,28 @@
 using namespace std;
 
 
-namespace myslam {
-namespace backend {
-void Problem::LogoutVectorSize() {
-    // LOG(INFO) <<
-    //           "1 problem::LogoutVectorSize verticies_:" << verticies_.size() <<
-    //           " edges:" << edges_.size();
+namespace myslam
+{
+namespace backend
+{
+void Problem::LogoutVectorSize()
+{
+    // LOG(INFO) << "1 problem::LogoutVectorSize verticies_:" << verticies_.size()
+    //          << " edges:" << edges_.size();
 }
 
-Problem::Problem(ProblemType problemType) :
-        problemType_(problemType) {
+Problem::Problem(ProblemType problemType) : problemType_(problemType)
+{
     LogoutVectorSize();
     verticies_marg_.clear();
 }
 
-Problem::~Problem() {}
+Problem::~Problem()
+{
+}
 
-bool Problem::AddVertex(std::shared_ptr<Vertex> vertex) {
+bool Problem::AddVertex(shared_ptr<Vertex> vertex)
+{
     if (verticies_.find(vertex->Id()) != verticies_.end()) {
         // LOG(WARNING) << "Vertex " << vertex->Id() << " has been added before";
         return false;
@@ -42,88 +47,95 @@ bool Problem::AddVertex(std::shared_ptr<Vertex> vertex) {
 }
 
 
-
-bool Problem::AddEdge(shared_ptr<Edge> edge) {
+bool Problem::AddEdge(shared_ptr<Edge> edge)
+{
     if (edges_.find(edge->Id()) == edges_.end()) {
-        edges_.insert(pair<ulong, std::shared_ptr<Edge>>(edge->Id(), edge));
+        edges_.insert(pair<ulong, shared_ptr<Edge>>(edge->Id(), edge));
     } else {
         // LOG(WARNING) << "Edge " << edge->Id() << " has been added before!";
         return false;
     }
 
-    for (auto &vertex : edge->Verticies()) {
+    for (auto& vertex : edge->Verticies()) {
         vertexToEdge_.insert(pair<ulong, shared_ptr<Edge>>(vertex->Id(), edge));
     }
     return true;
 }
 
 
-bool Problem::Solve(int iterations) {
+bool Problem::Solve(int iterations)
+{
     if (edges_.size() == 0 || verticies_.size() == 0) {
-        std::cerr << "\nCannot solve problem without edges or verticies" << std::endl;
+        cerr << "\nCannot solve problem without edges or verticies" << endl;
         return false;
     }
 
     TicToc t_solve;
+
     // 统计优化变量的维数，为构建 H 矩阵做准备
     SetOrdering();
+
     // 遍历edge, 构建 H = J^T * J 矩阵
     MakeHessian();
+
     // LM 初始化
     ComputeLambdaInitLM();
+
     // LM 算法迭代求解
     bool stop = false;
     int iter = 0;
     while (!stop && (iter < iterations)) {
-        std::cout << "iter: " << iter << ",\tchi = " << currentChi_ << ",\tLambda = " << currentLambda_
-                  << std::endl;
+        cout << "iter: " << iter << ",\tchi = " << currentChi_ << ",\tLambda = " << currentLambda_ << endl;
         allLambdasInIteration.push_back(currentLambda_);
-        allLambdasInIterationPair.push_back(std::pair<int, double>(iter, currentLambda_));
+        allLambdasInIterationPair.push_back(pair<int, double>(iter, currentLambda_));
 
         bool oneStepSuccess = false;
         int false_cnt = 0;
-        while (!oneStepSuccess)  // 不断尝试 Lambda, 直到成功迭代一步
-        {
-
+        while (!oneStepSuccess) {  // 不断尝试 Lambda, 直到成功迭代一步
             // setLambda
             AddLambdatoHessianLM();
+
             // 第四步，解线性方程 H X = B
             SolveLinearSystem();
-            //
+
+            // 再扣去Lambda还原H
             RemoveLambdaHessianLM();
 
             // 优化退出条件1： delta_x_ 很小或连续10次迭代误差都增大则退出
             if (delta_x_.squaredNorm() <= 1e-6 || false_cnt > 10) {
                 if (delta_x_.squaredNorm() <= 1e-6)
-                    std::cout << "[INFO] Iteration stops for delta_x too small: " << delta_x_.squaredNorm() << std::endl;
+                    cout << "[INFO] Iteration stops for delta_x too small: " << delta_x_.squaredNorm() << endl;
                 if (false_cnt > 10)
-                    std::cerr << "[ERROR] Iteration stops for 10 times increasing error." << std::endl;
+                    cerr << "[ERROR] Iteration stops for 10 times increasing error." << endl;
+
                 stop = true;
                 break;
             }
 
             // 更新状态量 X = X+ delta_x
             UpdateStates();
-            // 判断当前步是否可行以及 LM 的 lambda 怎么更新
+
+            // 判断当前步是否可行, 以及LM的 lambda 怎么更新
             oneStepSuccess = IsGoodStepInLM();
-            allLambdasInIterationPair.push_back(std::pair<int, double>(iter, currentLambda_));
+            allLambdasInIterationPair.push_back(pair<int, double>(iter, currentLambda_));
 
             // 后续处理，
             if (oneStepSuccess) {
                 // 在新线性化点 构建 hessian
                 MakeHessian();
-                // TODO:: 这个判断条件可以丢掉，条件 b_max <= 1e-12 很难达到，这里的阈值条件不应该用绝对值，而是相对值
-//                double b_max = 0.0;
-//                for (int i = 0; i < b_.size(); ++i) {
-//                    b_max = max(fabs(b_(i)), b_max);
-//                }
-//                // 优化退出条件2： 如果残差 b_max 已经很小了，那就退出
-//                stop = (b_max <= 1e-12);
+                // TODO:: 这个判断条件可以丢掉，条件 b_max <= 1e-12
+                // 很难达到，这里的阈值条件不应该用绝对值，而是相对值
+                //                double b_max = 0.0;
+                //                for (int i = 0; i < b_.size(); ++i) {
+                //                    b_max = max(fabs(b_(i)), b_max);
+                //                }
+                //                // 优化退出条件2： 如果残差 b_max 已经很小了，那就退出
+                //                stop = (b_max <= 1e-12);
                 false_cnt = 0;
             } else {
-                false_cnt++;
-                RollbackStates();   // 误差没下降，回滚
-//                std::cout << "误差增加，连续次数： " << false_cnt << std::endl;
+                false_cnt++;  // 如果连续10次尝试失败则退出
+                RollbackStates();  // 误差没下降，回滚. 尝试新的 lambda.
+                cout << "误差增加，连续次数： " << false_cnt << endl;
             }
         }
         iter++;
@@ -131,30 +143,33 @@ bool Problem::Solve(int iterations) {
         // 优化退出条件3： currentChi_ 跟第一次的chi2相比，下降了 1e6 倍则退出
         if (sqrt(currentChi_) <= stopThresholdLM_) {
             stop = true;
-            std::cout << "[INFO] Iteration stops for getting stop threshold." << std::endl;
+            cout << "[INFO] Iteration stops for getting stop threshold." << endl;
         }
     }
-    std::cout << "\nproblem solve cost: " << t_solve.toc() << " ms" << std::endl;
-    std::cout << "   makeHessian cost: " << t_hessian_cost_ << " ms" << std::endl;
+
+    cout << "\n- problem solve cost: " << t_solve.toc() << " ms" << endl;
+    cout << "- makeHessian cost: " << t_hessian_cost_ << " ms" << endl;
+
     return true;
 }
 
 
-void Problem::SetOrdering() {
-
+void Problem::SetOrdering()
+{
     // 每次重新计数
     ordering_poses_ = 0;
     ordering_generic_ = 0;
     ordering_landmarks_ = 0;
 
-    // Note:: verticies_ 是 map 类型的, 顺序是按照 id 号排序的
+    // NOTE:: verticies_ 是 map 类型的, 顺序是按照 id 号排序的
     // 统计带估计的所有变量的总维度
-    for (auto vertex: verticies_) {
-        ordering_generic_ += vertex.second->LocalDimension();  // 所有的优化变量总维数
+    for (auto vertex : verticies_) {
+        ordering_generic_ += vertex.second->LocalDimension();  // 所有的优化变量总维数, 决定H的大小
     }
 }
 
-void Problem::MakeHessian() {
+void Problem::MakeHessian()
+{
     TicToc t_h;
     // 直接构造大的 H 矩阵
     ulong size = ordering_generic_;
@@ -162,12 +177,12 @@ void Problem::MakeHessian() {
     VecX b(VecX::Zero(size));
 
     // TODO:: accelate, accelate, accelate
-//#ifdef USE_OPENMP
-//#pragma omp parallel for
-//#endif
+    //#ifdef USE_OPENMP
+    //#pragma omp parallel for
+    //#endif
 
     // 遍历每个残差，并计算他们的雅克比，得到最后的 H = J^T * J
-    for (auto &edge: edges_) {
+    for (auto& edge : edges_) {
 
         edge.second->ComputeResidual();
         edge.second->ComputeJacobians();
@@ -177,7 +192,8 @@ void Problem::MakeHessian() {
         assert(jacobians.size() == verticies.size());
         for (size_t i = 0; i < verticies.size(); ++i) {
             auto v_i = verticies[i];
-            if (v_i->IsFixed()) continue;    // Hessian 里不需要添加它的信息，也就是它的雅克比为 0
+            if (v_i->IsFixed())
+                continue;  // Hessian 里不需要添加它的信息，也就是它的雅克比为 0
 
             auto jacobian_i = jacobians[i];
             ulong index_i = v_i->OrderingId();
@@ -187,7 +203,8 @@ void Problem::MakeHessian() {
             for (size_t j = i; j < verticies.size(); ++j) {
                 auto v_j = verticies[j];
 
-                if (v_j->IsFixed()) continue;
+                if (v_j->IsFixed())
+                    continue;
 
                 auto jacobian_j = jacobians[j];
                 ulong index_j = v_j->OrderingId();
@@ -204,28 +221,27 @@ void Problem::MakeHessian() {
             }
             b.segment(index_i, dim_i).noalias() -= JtW * edge.second->Residual();
         }
-
     }
     Hessian_ = H;
     b_ = b;
     t_hessian_cost_ += t_h.toc();
 
     delta_x_ = VecX::Zero(size);  // initial delta_x = 0_n;
-
 }
 
 /*
 * Solve Hx = b, we can use PCG iterative method or use sparse Cholesky
 */
-void Problem::SolveLinearSystem() {
+void Problem::SolveLinearSystem()
+{
 
-        delta_x_ = Hessian_.inverse() * b_;
-//        delta_x_ = H.ldlt().solve(b_);
-
+    delta_x_ = Hessian_.inverse() * b_;
+    // delta_x_ = H.ldlt().solve(b_);  // Cholesky分解
 }
 
-void Problem::UpdateStates() {
-    for (auto vertex: verticies_) {
+void Problem::UpdateStates()
+{
+    for (auto vertex : verticies_) {
         ulong idx = vertex.second->OrderingId();
         ulong dim = vertex.second->LocalDimension();
         VecX delta = delta_x_.segment(idx, dim);
@@ -235,8 +251,9 @@ void Problem::UpdateStates() {
     }
 }
 
-void Problem::RollbackStates() {
-    for (auto vertex: verticies_) {
+void Problem::RollbackStates()
+{
+    for (auto vertex : verticies_) {
         ulong idx = vertex.second->OrderingId();
         ulong dim = vertex.second->LocalDimension();
         VecX delta = delta_x_.segment(idx, dim);
@@ -247,30 +264,32 @@ void Problem::RollbackStates() {
 }
 
 /// LM
-void Problem::ComputeLambdaInitLM() {
+void Problem::ComputeLambdaInitLM()
+{
     ni_ = 2.;
     currentLambda_ = -1.;
     currentChi_ = 0.0;
     // TODO:: robust cost chi2
-    for (auto edge: edges_) {
+    for (auto edge : edges_) {
         currentChi_ += edge.second->Chi2();
     }
     if (err_prior_.rows() > 0)
         currentChi_ += err_prior_.norm();
 
-    stopThresholdLM_ = 1e-6 * currentChi_;          // 迭代条件为 误差下降 1e-6 倍
+    stopThresholdLM_ = 1e-6 * currentChi_;  // 迭代条件为 误差下降 1e-6 倍
 
     double maxDiagonal = 0;
     ulong size = Hessian_.cols();
     assert(Hessian_.rows() == Hessian_.cols() && "Hessian is not square");
     for (ulong i = 0; i < size; ++i) {
-        maxDiagonal = std::max(fabs(Hessian_(i, i)), maxDiagonal);
+        maxDiagonal = max(fabs(Hessian_(i, i)), maxDiagonal);
     }
     double tau = 1e-5;
     currentLambda_ = tau * maxDiagonal;
 }
 
-void Problem::AddLambdatoHessianLM() {
+void Problem::AddLambdatoHessianLM()
+{
     ulong size = Hessian_.cols();
     assert(Hessian_.rows() == Hessian_.cols() && "Hessian is not square");
     for (ulong i = 0; i < size; ++i) {
@@ -278,34 +297,36 @@ void Problem::AddLambdatoHessianLM() {
     }
 }
 
-void Problem::RemoveLambdaHessianLM() {
+void Problem::RemoveLambdaHessianLM()
+{
     ulong size = Hessian_.cols();
     assert(Hessian_.rows() == Hessian_.cols() && "Hessian is not square");
-    // TODO:: 这里不应该减去一个，数值的反复加减容易造成数值精度出问题？而应该保存叠加lambda前的值，在这里直接赋值
+    // TODO::
+    // 这里不应该减去一个，数值的反复加减容易造成数值精度出问题？而应该保存叠加lambda前的值，在这里直接赋值
     for (ulong i = 0; i < size; ++i) {
         Hessian_(i, i) -= currentLambda_;
     }
 }
 
-bool Problem::IsGoodStepInLM() {
+bool Problem::IsGoodStepInLM()
+{
     double scale = 0;
     scale = delta_x_.transpose() * (currentLambda_ * delta_x_ + b_);
-    scale += 1e-3;    // make sure it's non-zero :)
+    scale += 1e-3;  // make sure it's non-zero :)
 
     // recompute residuals after update state
     // 统计所有的残差
     double tempChi = 0.0;
-    for (auto edge: edges_) {
+    for (auto edge : edges_) {
         edge.second->ComputeResidual();
         tempChi += edge.second->Chi2();
     }
 
     double rho = (currentChi_ - tempChi) / scale;
-    if (rho > 0 && isfinite(tempChi))   // last step was good, 误差在下降
-    {
-        double alpha = 1. - pow((2*rho - 1), 3);
-        alpha = std::min(alpha, 2./3.);
-        double scaleFactor = (std::max)(1./3., alpha);
+    if (rho > 0 && isfinite(tempChi)) { // last step was good, 误差在下降
+        double alpha = 1. - pow((2 * rho - 1), 3);
+        alpha = min(alpha, 2. / 3.);
+        double scaleFactor = (max)(1. / 3., alpha);
         currentLambda_ *= scaleFactor;
         ni_ = 2;
         currentChi_ = tempChi;
@@ -322,7 +343,8 @@ bool Problem::IsGoodStepInLM() {
 *  the jacobi PCG method
 *
 */
-VecX Problem::PCGSolver(const MatXX &A, const VecX &b, int maxIter = -1) {
+VecX Problem::PCGSolver(const MatXX& A, const VecX& b, int maxIter = -1)
+{
     assert(A.rows() == A.cols() && "PCG solver ERROR: A is not a square matrix");
     int rows = b.rows();
     int n = maxIter < 0 ? rows : maxIter;
@@ -354,38 +376,32 @@ VecX Problem::PCGSolver(const MatXX &A, const VecX &b, int maxIter = -1) {
     return x;
 }
 
-
-bool Problem::IsGoodStepInLM2() {
+// homework
+bool Problem::IsGoodStepInLM2()
+{
     double scale = 0;
     scale = 0.5 * delta_x_.transpose() * (currentLambda_ * delta_x_ + b_);
-    scale += 1e-3;    // make sure it's non-zero :)
+    scale += 1e-3;  // make sure it's non-zero :)
 
     // recompute residuals after update state
     // 统计所有的残差
     double tempChi = 0.0;
-    for (auto edge: edges_) {
+    for (auto edge : edges_) {
         edge.second->ComputeResidual();
         tempChi += edge.second->Chi2();
     }
     double rho = (currentChi_ - tempChi) / scale;
-    
-	
-    if (rho > 0 && isfinite(tempChi))   // last step was good, 误差在下降
-    {
-        currentLambda_ = max(currentLambda_/4., 1.0e-7);	// L_down = 4
+
+
+    if (rho > 0 && isfinite(tempChi)) { // last step was good, 误差在下降
+        currentLambda_ = max(currentLambda_ / 4., 1.0e-7);  // L_down = 4
         currentChi_ = tempChi;
         return true;
     } else {
-        currentLambda_ = min(currentLambda_*6., 1.0e7);	// L_up = 6
+        currentLambda_ = min(currentLambda_ * 6., 1.0e7);  // L_up = 6
         return false;
     }
 }
 
-}   // namespace backend
-}   // namespace myslam
-
-
-
-
-
-
+}  // namespace backend
+}  // namespace myslam

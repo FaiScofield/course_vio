@@ -44,7 +44,7 @@ int main()
     default_random_engine generator;
     uniform_real_distribution<double> xy_rand(-4, 4.0);
     uniform_real_distribution<double> z_rand(8., 10.);
-    double tx = xy_rand(generator);
+    double tx = xy_rand(generator); 
     double ty = xy_rand(generator);
     double tz = z_rand(generator);
 
@@ -75,13 +75,13 @@ int main()
         double vi = camera_pose[i].uv[1];
 
         // 这里R,t是World->Camera的投影
-        Eigen::Matrix<double, 3, 4> P;
-        P.block(0, 0, 3, 3) = camera_pose[i].Rwc.inverse();
-        P.block(0, 3, 3, 1) = -camera_pose[i].Rwc.inverse()*camera_pose[i].twc;
+        Eigen::Matrix<double, 3, 4> Pi;
+        Pi.block(0, 0, 3, 3) = camera_pose[i].Rwc.inverse();
+        Pi.block(0, 3, 3, 1) = -camera_pose[i].Rwc.inverse()*camera_pose[i].twc;
 
         int idx = 2 * (i - start_frame_id);
-        D.block(idx, 0, 1, 4) = ui * P.row(2) - P.row(0);
-        D.block(idx+1, 0, 1, 4) = vi * P.row(2) - P.row(1);
+        D.block(idx, 0, 1, 4) = ui * Pi.row(2) - Pi.row(0);
+        D.block(idx+1, 0, 1, 4) = vi * Pi.row(2) - Pi.row(1);
     }
 
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(D.transpose()*D, Eigen::ComputeThinU | Eigen::ComputeThinV);

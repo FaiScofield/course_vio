@@ -5,16 +5,18 @@
 #ifndef SLAM_COURSE_FRAME_H
 #define SLAM_COURSE_FRAME_H
 
-#include <opencv2/opencv.hpp>
-#include <memory>
+#include "backend/eigen_types.h"
 #include "camera.h"
 #include "feature.h"
-#include "backend/eigen_types.h"
-#include "sophus/so3.hpp"
 #include "sophus/se3.hpp"
+#include "sophus/so3.hpp"
+#include <memory>
+#include <opencv2/opencv.hpp>
 
-namespace myslam {
-namespace frontend {
+namespace myslam
+{
+namespace frontend
+{
 
 struct Frame {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
@@ -37,8 +39,7 @@ private:
     Vec7 Twb_states;
     Vec9 speed_and_bias_states = Vec9::Zero();
 };
-
 }
 }
 
-#endif //SLAM_COURSE_FRAME_H
+#endif  // SLAM_COURSE_FRAME_H

@@ -74,6 +74,7 @@ public:
     // test compute prior
     void TestComputePrior();
 
+    // homework
     std::vector<double>& getAllLambdas() { return allLambdasInIteration; }
     std::vector<std::pair<int, double>>& getAllLambdasPair() { return allLambdasInIterationPair; }
 
@@ -143,7 +144,7 @@ private:
     double currentLambda_;
     double currentChi_;
     double stopThresholdLM_;  // LM 迭代退出阈值条件
-    double ni_;               //控制 Lambda 缩放大小
+    double ni_;  //控制 Lambda 缩放大小
 
     ProblemType problemType_;
 
@@ -190,6 +191,7 @@ private:
     double t_hessian_cost_ = 0.0;
     double t_PCGsovle_cost_ = 0.0;
 
+    // homework
     std::vector<double> allLambdasInIteration;
     std::vector<std::pair<int, double>> allLambdasInIterationPair;
 };
